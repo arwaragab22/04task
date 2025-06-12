@@ -1,0 +1,11 @@
+.css-ot336b-MuiInputBase-root-MuiOutlinedInput-root,.MuiOutlinedInput-input {
+  background-color: #f8f8f8 !important
+}
+body{
+  padding: 0px;margin: 0px;
+}
+@media (max-width: 600px) {
+  ::placeholder {
+    font-size: 13px;
+  }
+}
