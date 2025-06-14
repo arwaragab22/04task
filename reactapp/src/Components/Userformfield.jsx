@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -7,11 +7,19 @@ import {
   InputAdornment,
   FormHelperText,
 } from "@mui/material";
+import 'react-phone-input-2/lib/style.css'
+import { Controller } from "react-hook-form";
 import { grey } from "@mui/material/colors";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { useForm, useFormContext } from "react-hook-form";
 import Divider from '@mui/material/Divider';
+import countries from "i18n-iso-countries";
+import enLocale from "i18n-iso-countries/langs/en.json";
 
+
+import "../a.css"
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 import {
 
@@ -24,34 +32,43 @@ import {
 } from "@mui/material";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import { Controller } from "react-hook-form";
 
 export function Userformfield(props) {
+  countries.registerLocale(enLocale);
 
-  
+  const countryList = Object.entries(countries.getNames("en")).map(([code, name]) => ({
+    code,
+    name,
+  }));
   const { register, setValue, watch, formState: { errors }, control } = useFormContext();
+  const CustomInput = forwardRef((props, ref) => (
+    <input
+      {...props}
+      ref={ref}
+      placeholder={props.placeholder || 'رقم الهاتف'}
+      style={{
+        paddingLeft: "60px",
+        height: "40px",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        fontSize: "14px"
+      }}
+    />
+  ));
 
-  const [studentPhone, setStudentPhone] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
 
   const selectedSession = watch("monthlySessions");
-  const countries = [
-    { code: "+971", flag: "🇦🇪", label: "UAE" },
-    { code: "+20", flag: "🇪🇬", label: "Egypt" },
-    { code: "+966", flag: "🇸🇦", label: "KSA" },
-    { code: "+30", flag: "🇬🇷", label: "Greece" }
+  const [phonecode1, setphonecode1] = useState();
+  const [paymentMethod, setPaymentMethod] = useState("");
 
 
-  ];
   useEffect(() => {
     console.log("Selected country code: ", props.countryCode);
   }, [props.countryCode]);
   return (
-    <Box sx={{ padding: { xs: "5px", md: 2 } , display: "flex", flexDirection: "column", gap: "20px", textAlign: "start" }}>
+    <Box sx={{ padding: { xs: "5px", md: 2 }, display: "flex", flexDirection: "column", gap: "20px", textAlign: "start" }}>
 
-  
+
       <Box>    <Typography variant="subtitle2" sx={{ fontSize: ".9rem", mt: 2 }}>
         <Box component="span" sx={{ color: grey[500] }}>Login PHONE NUMBER</Box>{" "}
         (<Box component="span">preferably <u>the student's</u></Box>)
@@ -60,89 +77,82 @@ export function Userformfield(props) {
         <Controller
           name="studentPhone"
           control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField 
-              {...field}
-              fullWidth
-              placeholder="Phone Number"
-              error={!!errors.studentPhone}
-              helperText={errors.studentPhone?.message}
-              onChange={(e) => {
-                console.log(e.target)
-                const digitsOnly = e.target.value.replace(/\D/g, "");
-                console.log(digitsOnly)
-                field.onChange(digitsOnly);
-                
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Select
-                      value={props.countryCode}
-                      onChange={(e) => {
-                        setValue("countryCode", e.target.value);
-                    props.setCountryCode(e.target.value)
-                      }}
-                      variant="standard"
-                      disableUnderline
-                      sx={{ minWidth: 80, fontSize: "0.9rem" }}
-                    >
-                      {countries.map((item) => (
-                        <MenuItem key={item.code} value={item.code}>
-                          {item.flag} {item.code}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </InputAdornment>
-                ),
-              }}
-            />
+
+          render={({ field, fieldState }) => (
+            <div className="phone-wrapper" style={{ zIndex: 90 }}>
+              <PhoneInput
+                {...field}
+                country="ae" // 🇦🇪
+                enableSearch
+
+                disableDropdown={false}
+                countryCodeEditable={false}
+                inputProps={{ name: 'studentPhone' }}
+                inputClass="custom-phone-input"
+                buttonClass="custom-flag-button"
+                containerClass="custom-phone-container"
+                dropdownClass="custom-dropdown"
+              />
+
+
+              {(!field.value || field.value === '+971') && (
+                <span className="placeholder-overlay"></span>
+              )}
+
+              {fieldState.error && (
+                <p className="error-message">{fieldState.error.message}</p>
+              )}
+            </div>
           )}
-        /></Box>
-    
-  <Box>    <Typography variant="subtitle2" sx={{ fontSize: ".9rem" }}>
-        <Box component="span" sx={{ color: grey[500] }}>CONTACT PHONE NUMBER</Box>{" "}
+        />
+
+
+
+
+
+
+
+
+      </Box>
+
+      <Box>    <Typography variant="subtitle2" sx={{ fontSize: ".9rem" }}>
+        <Box component="span" sx={{ color: grey[500] }}></Box>{" "}
         (<Box component="span">preferably <u>the parent's</u></Box>)
       </Typography>
+        <Controller
+          name="parentPhone"
 
-      <Controller
-        name="parentPhone"
-        control={control}
-        defaultValue=""
-        render={({ field }) => (
-          <TextField
-            {...field}
-            fullWidth
-            placeholder="Parent's Phone Number"
-            error={!!errors.parentPhone}
-            helperText={errors.parentPhone?.message}
-            onChange={(e) => {
-              const cleaned = e.target.value.replace(/\D/g, "");
-              field.onChange( cleaned);
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Select
-                    value={props.countryCode}
-                    onChange={(e) => { setValue("parentCountryCode", e.target.value); props.setCountryCode(e.target.value) }}
-                    variant="standard"
-                    disableUnderline
-                    sx={{ minWidth: 80, fontSize: "0.9rem" }}
-                  >
-                    {countries.map((item) => (
-                      <MenuItem key={item.code} value={item.code}>
-                        {item.flag} {item.code}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
-      /></Box>
+          control={control}
+
+          render={({ field, fieldState }) => (
+            <div className="phone-wrapper" style={{ zIndex: 9 }}
+            >
+              <PhoneInput
+                {...field}
+                country="ae" // 🇦🇪
+                enableSearch
+
+                disableDropdown={false}
+                countryCodeEditable={false}
+                inputProps={{ name: 'parentPhone' }}
+                inputClass="custom-phone-input"
+                buttonClass="custom-flag-button"
+                containerClass="custom-phone-container"
+                dropdownClass="custom-dropdown"
+              />
+
+
+              {(!field.value || field.value === '+971') && (
+                <span className="placeholder-overlay"></span>
+              )}
+
+              {fieldState.error && (
+                <p className="error-message">{fieldState.error.message}</p>
+              )}
+            </div>
+          )}
+        />
+      </Box>
 
       <Box>
         <Typography variant="subtitle2" sx={{ color: grey[500] }}>
@@ -211,27 +221,55 @@ export function Userformfield(props) {
           />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <FormControl fullWidth error={!!errors.country}>
+          <FormControl fullWidth error={!!errors.country} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}>
+            <InputLabel id="country-label">Country</InputLabel>
             <Select
+              labelId="country-label"
               displayEmpty
               defaultValue=""
               {...register("country")}
+              label="Country"
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                PaperProps: {
+                  style: {
+                    maxHeight: 300,
+                    width: "300px",
+                    zIndex: 1300,
+                  },
+                },
+              }}
+              sx={{ backgroundColor: "#fff" }}
               renderValue={(selected) =>
-                selected ? selected : <span style={{ color: "#888" }}>Country</span>
+                selected ? selected : ""
               }
             >
-              <MenuItem value="">Country</MenuItem>
-              <MenuItem value="eg">🇪🇬 Egypt</MenuItem>
-              <MenuItem value="us">🇺🇸 USA</MenuItem>
-              <MenuItem value="sa">🇸🇦 Saudi Arabia</MenuItem>
+              <MenuItem value="">
+              </MenuItem>
+
+              {countryList.map(({ code, name }) => (
+                <MenuItem key={code} value={code}>
+                  {name}
+                </MenuItem>
+              ))}
             </Select>
+
+            {errors.country && (
+              <Typography variant="caption" color="error">
+                {errors.country.message}
+              </Typography>
+            )}
           </FormControl>
 
-          {errors.country && (
-            <Typography variant="caption" color="error">
-              {errors.country.message}
-            </Typography>
-          )}
+
+
         </Grid>
       </Grid>
 
@@ -267,21 +305,27 @@ export function Userformfield(props) {
         </FormControl></Box>
 
 
-    
 
 
-      <Typography variant="subtitle2" sx={{ color: grey[500] ,marginTop:"10px"}}>
+
+      <Typography variant="subtitle2" sx={{ color: grey[500], marginTop: "10px" }}>
         Select Payment Method
       </Typography>
-      <Box sx={{border:`1px solid ${grey[200]}`,padding:"10px 10px"}}>
-        <FormControl component="fieldset" error={!!errors.paymentMethod} sx={{width:"100%"}}>
+      <Box sx={{ border: `1px solid ${grey[200]}`, padding: "10px 10px" }}>
+        <FormControl component="fieldset" error={!!errors.paymentMethod} sx={{ width: "100%" }}>
           <Controller
             name="paymentMethod"
             control={control}
             defaultValue=""
             rules={{ required: "Please select a payment method" }}
             render={({ field }) => (
-              <RadioGroup {...field}>
+              <RadioGroup {...field} onChange={(e) => {
+                console.log(paymentMethod)
+                field.onChange(e);
+                setPaymentMethod(e.target.value);
+              }}
+
+              >
                 <FormControlLabel
                   value="sepa"
                   control={<Radio />}
@@ -291,7 +335,60 @@ export function Userformfield(props) {
                     </Box>
                   }
                 />
-                <Divider sx={{ width: "100%" }} border={`1px solid ${grey[200]}` } />
+                <Box>
+
+                  {paymentMethod === "sepa" &&
+                    <><TextField
+                      fullWidth
+                      placeholder="Account Holder"
+                      {...register("accountHolder", {
+                        required: "Account holder name is required",
+                        pattern: {
+                          value: /^[A-Za-z]{2,}(?: [A-Za-z]{2,})+$/,
+                          message: "Please enter full name (first and last)",
+                        },
+                      })}
+                      error={!!errors.accountHolder}
+                      helperText={errors.accountHolder?.message}
+                      sx={{ marginTop: "10px" }}
+                    />
+
+                      <TextField
+                        fullWidth
+                        placeholder="IBAN"
+                        {...register("iban", {
+                          required: "IBAN is required",
+                          pattern: {
+                            value: /^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/,
+                            message: "Invalid IBAN format",
+                          },
+                        })}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <CreditCardIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <Typography variant="body2" color="text.secondary">
+                                e.g. AE07...
+                              </Typography>
+
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ backgroundColor: grey[100], marginTop: "15px" }}
+                      />
+
+                      {errors.iban && (
+                        <Typography variant="caption" color="error">
+                          {errors.iban.message}
+                        </Typography>
+                      )}
+                    </>}
+                </Box>
+                <Divider sx={{ width: "100%" }} border={`1px solid ${grey[200]}`} />
                 <FormControlLabel
                   value="card"
                   control={<Radio />}
@@ -301,16 +398,19 @@ export function Userformfield(props) {
                         src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
                         alt="Visa"
                         height={15}
+                        width={15}
                       />
                       <img
                         src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
                         alt="Mastercard"
                         height={15}
+                        width={15}
                       />
                       <img
                         src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg"
                         alt="Amex"
                         height={15}
+                        width={15}
                       />
                     </Box>
                   }
@@ -323,40 +423,43 @@ export function Userformfield(props) {
             <FormHelperText>{errors.paymentMethod.message}</FormHelperText>
           )}
         </FormControl>
+        <Box>{paymentMethod == "sepa" ?
+          "" : (<>        <TextField
+            fullWidth
+            placeholder="Card Holder"
+            {...register("cardHolder")}
+            error={!!errors.cardHolder}
+            helperText={errors.cardHolder?.message} sx={{ marginTop: "10px" }}
+          />
 
-        <TextField
-          fullWidth
-          placeholder="Card Holder"
-          {...register("cardHolder")}
-          error={!!errors.cardHolder}
-          helperText={errors.cardHolder?.message} sx={{ marginTop: "30px" }}
-        />
+            <TextField
+              fullWidth
+              placeholder="Card Number"
+              {...register("cardNumber")}
 
-        <TextField
-          fullWidth
-          placeholder="Card Number"
-          {...register("cardNumber")}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <CreditCardIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Typography variant="body2" color="text.secondary">
+                      MM/YY/CVC
+                    </Typography>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ backgroundColor: grey[100], marginTop: "15px" }}
+            />
+            {errors.cardNumber && (
+              <Typography variant="caption" color="error">
+                {errors.cardNumber.message}
+              </Typography>
+            )}</>)}</Box>
+      </Box>
 
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <CreditCardIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <Typography variant="body2" color="text.secondary">
-                  MM/YY/CVC
-                </Typography>
-              </InputAdornment>
-            ),
-          }}
-          sx={{ backgroundColor: grey[100], marginTop: "15px" }}
-        />      {errors.cardNumber && (
-          <Typography variant="caption" color="error">
-            {errors.cardNumber.message}
-          </Typography>
-        )}</Box>
 
     </Box>
 

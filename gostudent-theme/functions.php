@@ -2,11 +2,12 @@
 function mytheme_enqueue_scripts() {
     $dist_path = get_template_directory_uri() . '/dist';
 
-    
-    wp_enqueue_style('mytheme-style', $dist_path . '/assets/index-6YakUR_g.css', [], null);
+    // CSS
+    wp_enqueue_style('mytheme-style', $dist_path . '/assets/index-DDA4tX3L.css', [], null);
+    wp_enqueue_style('mytheme-style', $dist_path . '/assets/a.css', [], null);
 
-    wp_enqueue_script('mytheme-script', $dist_path . '/assets/index-BwpJHEH1.js', [], null, true);
-
+    // JS as module
+    wp_enqueue_script('mytheme-script', $dist_path . '/assets/index-D6aHBWEk.js', [], null, true);
 
     add_filter('script_loader_tag', function($tag, $handle, $src) {
         if ($handle === 'mytheme-script') {
